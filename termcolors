@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+print_color() {
+    print -n -- "$1 "
+    tput setaf "$@"
+    tput setaf "$@" | cat -v
+    tput init
+    print
+}
+
+for c in {0..15};   do print_color "$c"; done | column -x
+print
+for c in {16..255}; do print_color "$c"; done | column -x
