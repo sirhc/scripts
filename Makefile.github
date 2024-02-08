@@ -24,7 +24,7 @@ export GH_GRAPHQL_REPOS
 all: clone register fetch
 
 branches:
-	$(MAKE) -s branches-csv | mlr --icsv --opprint cat | hl -e -c 'main|master|gh-pages'
+	$(MAKE) -s branches-csv | mlr --icsv --opprint filter -e '$$Branch !=~ "^(main|master|gh-pages)$$"'
 
 branches-csv:
 	print 'Repository,Branch'
