@@ -1,0 +1,57 @@
+GH       = gh
+MR       = mr -m -j8
+MRCONFIG = .mrconfig
+OWNER    = $(notdir $(PWD))
+SHELL    = zsh
+IS_FORK  = false
+
+MLR_ALWAYS_COLOR = true
+export MLR_ALWAYS_COLOR
+
+all: clone register fetch
+
+branches:
+	$(MAKE) -s branches-csv | mlr --icsv --opprint cat | hl -e -c 'main|master|gh-pages'
+
+branches-csv:
+	print 'Repository,Branch'
+	$(MR) run command -- git rev-parse --abbrev-ref HEAD | sed -e 's,mr run: .*/,,' -e '/^$$/d' | paste -s -d',\n' -
+
+clone:
+	$(MAKE) -s _repos | $(MAKE) -s _clone
+	$(MAKE) -s _repos IS_FORK=true | $(MAKE) -s _clone
+
+_repos:
+	$(GH) api graphql --paginate -q '.data.repositoryOwner.repositories.nodes[] | .nameWithOwner' -F owner='$(OWNER)' -F isFork='$(IS_FORK)' -f query=' \
+	  query($$owner: String! $$isFork: Boolean! $$endCursor: String) { \
+	    repositoryOwner(login: $$owner) { \
+	      repositories(first: 100 ownerAffiliations: OWNER isFork: $$isFork orderBy: { field: NAME direction: ASC } after: $$endCursor) { \
+	        totalCount \
+	        pageInfo { hasNextPage endCursor } \
+	        nodes { nameWithOwner } \
+	      } \
+	    } \
+	  } \
+	'
+
+_clone:
+	parallel ' \
+	  if [[ ! -d "$$( basename "{}" )" ]]; then \
+	    gh repo clone "{}"; \
+	  fi \
+	'
+
+register:
+	touch $(MRCONFIG)
+	printf '%s\n' */.git(D/:h) | parallel -j 1 ' \
+	  if ! grep -q "^\[{}\]" $(MRCONFIG); then \
+	    mr register {} || print "mr: {}" 1>&2; \
+	  fi \
+	'
+
+fetch:
+	$(MR) fetch
+	$(MR) run command -- git gc --auto --quiet
+
+update:
+	$(MR) update
