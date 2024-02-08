@@ -8,6 +8,19 @@ IS_FORK  = false
 MLR_ALWAYS_COLOR = true
 export MLR_ALWAYS_COLOR
 
+define GH_GRAPHQL_REPOS
+query($$owner: String! $$isFork: Boolean! $$endCursor: String) {
+  repositoryOwner(login: $$owner) {
+    repositories(first: 100 ownerAffiliations: OWNER isFork: $$isFork orderBy: { field: NAME direction: ASC } after: $$endCursor) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      nodes { nameWithOwner }
+    }
+  }
+}
+endef
+export GH_GRAPHQL_REPOS
+
 all: clone register fetch
 
 branches:
@@ -22,17 +35,7 @@ clone:
 	$(MAKE) -s _repos IS_FORK=true | $(MAKE) -s _clone
 
 _repos:
-	$(GH) api graphql --paginate -q '.data.repositoryOwner.repositories.nodes[] | .nameWithOwner' -F owner='$(OWNER)' -F isFork='$(IS_FORK)' -f query=' \
-	  query($$owner: String! $$isFork: Boolean! $$endCursor: String) { \
-	    repositoryOwner(login: $$owner) { \
-	      repositories(first: 100 ownerAffiliations: OWNER isFork: $$isFork orderBy: { field: NAME direction: ASC } after: $$endCursor) { \
-	        totalCount \
-	        pageInfo { hasNextPage endCursor } \
-	        nodes { nameWithOwner } \
-	      } \
-	    } \
-	  } \
-	'
+	$(GH) api graphql --paginate -q '.data.repositoryOwner.repositories.nodes[] | .nameWithOwner' -F owner='$(OWNER)' -F isFork='$(IS_FORK)' -f query="$$GH_GRAPHQL_REPOS"
 
 _clone:
 	parallel ' \
