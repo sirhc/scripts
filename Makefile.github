@@ -21,7 +21,7 @@ query($$owner: String! $$isFork: Boolean! $$endCursor: String) {
 endef
 export GH_GRAPHQL_REPOS
 
-all: clone register fetch
+all: clone register maintenance
 
 branches:
 	$(MAKE) -s branches-csv | mlr --icsv --opprint filter -e '$$Branch !=~ "^(main|master|gh-pages)$$"'
@@ -58,3 +58,6 @@ fetch:
 
 update:
 	$(MR) update
+
+maintenance:
+	$(MR) -j1 run command git maintenance start
