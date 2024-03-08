@@ -54,6 +54,8 @@ register:
 
 fetch:
 	$(MR) fetch
+
+gc:
 	$(MR) run command -- git gc --auto --quiet
 
 update:
