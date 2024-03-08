@@ -30,6 +30,9 @@ branches-csv:
 	print 'Repository,Branch'
 	$(MR) run command -- git rev-parse --abbrev-ref HEAD | sed -e 's,mr run: .*/,,' -e '/^$$/d' | paste -s -d',\n' -
 
+localbranches:
+	$(MR) run command -- zsh -c 'git branch -vv | cut -c3- | awk "(\$$1 != \"$$( git rev-parse --abbrev-ref origin/HEAD | sed "s@^origin/@@" )\") { print }"'
+
 clone:
 	$(MAKE) -s _repos | $(MAKE) -s _clone
 	$(MAKE) -s _repos IS_FORK=true | $(MAKE) -s _clone
