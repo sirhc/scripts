@@ -61,5 +61,8 @@ gc:
 update:
 	$(MR) update
 
+prune:
+	$(MR) prunebranches
+
 maintenance:
 	$(MR) -j1 run command git maintenance start
