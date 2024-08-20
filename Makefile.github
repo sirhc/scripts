@@ -1,9 +1,10 @@
 GH       = gh
-MR       = mr -m -j8
+MR       = mr -m -j$(JOBS)
 MRCONFIG = .mrconfig
 OWNER    = $(notdir $(PWD))
 SHELL    = zsh
 IS_FORK  = false
+JOBS     = $(shell nproc --all)
 
 MLR_ALWAYS_COLOR = true
 export MLR_ALWAYS_COLOR
