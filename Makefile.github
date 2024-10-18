@@ -1,3 +1,4 @@
+GH       = env GH_PAGER= gh
 MR       = mr -m -j$(JOBS)
 MRCONFIG = .mrconfig
 OWNER    = $(notdir $(PWD))
@@ -54,7 +55,7 @@ update:
 	$(MR) update
 
 _clone:
-	parallel '[[ -d "$$( basename "{}" )" ]] || gh repo clone "{}"'
+	parallel '[[ -d "$$( basename "{}" )" ]] || $(GH) repo clone "{}"'
 
 _repos:
 	$(GH) api graphql --paginate -q '.data.repositoryOwner.repositories.nodes[] | .nameWithOwner' -F owner='$(OWNER)' -F isFork='$(IS_FORK)' -f query="$$GH_GRAPHQL_REPOS"
