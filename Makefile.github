@@ -44,8 +44,8 @@ fetch:
 gc:
 	$(MR) gc --auto --quiet
 
-# prune:
-# 	$(MR) prunebranches
+gone:
+	$(MR) git gone
 
 register:
 	touch $(MRCONFIG)
