@@ -42,7 +42,7 @@ fetch:
 	$(MR) fetch
 
 gc:
-	$(MR) run command -- git gc --auto --quiet
+	$(MR) gc --auto --quiet
 
 prune:
 	$(MR) prunebranches
