@@ -52,7 +52,7 @@ register:
 	printf '%s\n' */.git(D/:h) | parallel -j 1 'grep -q "^\[{}\]" $(MRCONFIG) || mr register {} 2>/dev/null || :'
 
 update:
-	$(MR) update
+	$(MR) update --quiet
 
 _clone:
 	parallel '[[ -d "$$( basename "{}" )" ]] || $(GH) repo clone "{}"'
