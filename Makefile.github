@@ -32,7 +32,7 @@ branches-csv:
 	$(MR) run command -- $(SHELL) -c 'git rev-parse --abbrev-ref HEAD; git rev-parse --abbrev-ref origin/HEAD | sed "s@^origin/@@"' | sed -e 's,mr run: .*/,,' -e '/^$$/d' | paste -d',' - - -
 
 branches-local:
-	$(MR) run command -- zsh -c 'git branch -vv | cut -c3- | awk "(\$$1 != \"$$( git rev-parse --abbrev-ref origin/HEAD | sed "s@^origin/@@" )\") { print }"'
+	$(MR) run command -- $(SHELL) -c 'git branch -vv | cut -c3- | awk "(\$$1 != \"$$( git rev-parse --abbrev-ref origin/HEAD | sed "s@^origin/@@" )\") { print }"'
 
 clone:
 	$(MAKE) -s _repos | $(MAKE) -s _clone
