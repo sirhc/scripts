@@ -44,8 +44,8 @@ fetch:
 gc:
 	$(MR) gc --auto --quiet
 
-prune:
-	$(MR) prunebranches
+# prune:
+# 	$(MR) prunebranches
 
 register:
 	touch $(MRCONFIG)
