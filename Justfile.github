@@ -1,0 +1,50 @@
+set shell := ["zsh", "-cu"]
+
+jobs     := `nproc --all`
+mr       := "mr -m -j" + jobs
+mrconfig := justfile_directory() + "/.mrconfig"
+owner    := file_name(justfile_directory())
+
+all: clone register fetch
+
+branches:
+  just _branches | mlr --c2p --hi label 'Repository,Branch,DefaultBranch' then filter -e '$Branch != $DefaultBranch'
+
+clone:
+  just _repos | just _clone
+  just _repos true | just _clone
+
+fetch:
+  {{ mr }} fetch
+
+gc:
+  {{ mr }} gc --quiet
+
+gone:
+  {{ mr }} git gone
+
+register:
+  touch {{ mrconfig }}
+  printf '%s\n' */.git(D/:h) | parallel 'rg -F -q "[{}]" {{ mrconfig }} || print {}' | xargs -I % mr register % 2> /dev/null || :
+
+update:
+  {{ mr }} update --quiet
+
+_branches:
+  {{ mr }} run command -- zsh -c 'git rev-parse --abbrev-ref HEAD origin/HEAD' | sed -e 's,mr run: .*/,,' -e 's,^origin/,,' -e '/^$/d' | paste -d , - - -
+
+_clone:
+  parallel '[[ -d "$( basename {} )" ]] || gh repo clone {}'
+
+_repos isFork="false":
+  #!/usr/bin/env -S zsh -e
+  gh api graphql --paginate -q '.data.repositoryOwner.repositories.nodes[] | .nameWithOwner' -F owner='{{ owner }}' -F isFork='{{ isFork }}' -f query='
+    query($owner: String! $isFork: Boolean! $endCursor: String) {
+      repositoryOwner(login: $owner) {
+        repositories(first: 100 ownerAffiliations: OWNER isFork: $isFork orderBy: { field: NAME direction: ASC } after: $endCursor) {
+          pageInfo { hasNextPage endCursor }
+          nodes { nameWithOwner }
+        }
+      }
+    }
+  '
